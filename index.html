@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CubePairs Merge & Match - Fun Pattern Matching Puzzle Game</title>
+
+    <!-- Primary Meta Tags -->
+    <meta
+      name="title"
+      content="CubePairs Merge & Match - Fun Pattern Matching Puzzle Game"
+    />
+    <meta
+      name="description"
+      content="Challenge yourself with CubePairs, an addictive pattern matching puzzle game. Match cube patterns, clear the grid, and test your strategic thinking across multiple difficulty levels."
+    />
+    <meta
+      name="keywords"
+      content="puzzle game, pattern matching, brain teaser, strategy game, cube game, logic puzzle, online game, free browser game"
+    />
+    <meta name="author" content="Danrui Wang" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="logo.png" type="image/png" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Quicksand:wght@500;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --primary-color: #6366f1;
+        --secondary-color: #4f46e5;
+        --background-color: #1e293b;
+        --surface-color: #ffffff;
+        --text-color: #1e293b;
+        --accent-color: #22c55e;
+        --error-color: #ef4444;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        background-color: var(--background-color);
+        margin: 0;
+        padding: 40px 20px;
+        line-height: 1.6;
+        color: var(--text-color);
+        min-height: 100vh;
+        position: relative;
+      }
+
+      .game-container {
+        background: var(--surface-color);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        max-width: 600px;
+        width: 100%;
+      }
+
+      .game-title {
+        font-family: "Quicksand", sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-bottom: 1.5rem;
+        text-align: center;
+        background: linear-gradient(
+          135deg,
+          var(--primary-color),
+          var(--secondary-color)
+        );
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .difficulty-buttons {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .difficulty-btn {
+        padding: 0.75rem 1.5rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: var(--surface-color);
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+        cursor: pointer;
+        border-radius: 9999px;
+        transition: all 0.2s ease;
+      }
+
+      .difficulty-btn:hover {
+        background-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+      }
+
+      .difficulty-btn.active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+
+      #move-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 1.5rem;
+      }
+
+      #move-counter {
+        font-family: "Quicksand", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-align: center;
+      }
+
+      #best-score {
+        font-family: "Quicksand", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+        text-align: center;
+      }
+
+      #grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        max-width: 400px;
+        margin: 0 auto 2rem auto;
+      }
+
+      .grid-cell {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        aspect-ratio: 1;
+        border: 2px solid var(--primary-color);
+        border-radius: 12px;
+        cursor: pointer;
+        background-color: var(--surface-color);
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .grid-cell:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+      }
+
+      .grid-cell table {
+        border-spacing: 3px;
+      }
+
+      .grid-cell td {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+      }
+
+      .grid-cell .filled {
+        background-color: var(--primary-color);
+      }
+
+      .grid-cell .empty {
+        background-color: #e2e8f0;
+      }
+
+      .selected {
+        background-color: #fef9c3 !important;
+        border-color: var(--secondary-color) !important;
+      }
+
+      #restart-btn {
+        display: block;
+        margin: 0 auto;
+        padding: 1rem 2rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 9999px;
+        transition: all 0.2s ease;
+      }
+
+      #restart-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      .game-rules {
+        background-color: var(--surface-color);
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-top: 2rem;
+        text-align: center;
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--text-color);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      }
+
+      /* Modal styles */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.6);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+      }
+
+      .modal {
+        background: var(--surface-color);
+        padding: 2rem;
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+          0 2px 4px -2px rgb(0 0 0 / 0.1);
+        max-width: 300px;
+        width: 90%;
+        text-align: center;
+      }
+
+      .modal h2 {
+        margin-top: 0;
+        font-size: 1.5rem;
+        color: var(--text-color);
+      }
+
+      .modal p {
+        font-size: 1rem;
+        color: var(--text-color);
+        margin: 1rem 0;
+      }
+
+      .modal-button {
+        margin-top: 1rem;
+        padding: 0.75rem 1.5rem;
+        font-family: "Poppins", sans-serif;
+        font-size: 1rem;
+        font-weight: 600;
+        background-color: var(--accent-color);
+        color: white;
+        border: none;
+        cursor: pointer;
+        border-radius: 9999px;
+        transition: all 0.2s ease;
+      }
+
+      .modal-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+
+      @media screen and (max-width: 768px) {
+        .game-title {
+          font-size: 2rem;
+          margin-bottom: 1rem;
+        }
+
+        .game-container {
+          padding: 1.5rem;
+          margin: 1rem;
+        }
+
+        .difficulty-buttons {
+          gap: 8px;
+          margin-bottom: 1.5rem;
+        }
+
+        .difficulty-btn {
+          padding: 0.6rem 1.2rem;
+          font-size: 0.9rem;
+        }
+
+        #grid {
+          gap: 10px;
+          max-width: 350px;
+        }
+
+        .grid-cell td {
+          width: 18px;
+          height: 18px;
+        }
+
+        .game-rules {
+          font-size: 0.9rem;
+          padding: 1.25rem;
+        }
+      }
+
+      @media screen and (max-width: 480px) {
+        .game-title {
+          font-size: 1.75rem;
+        }
+
+        .game-container {
+          padding: 1rem;
+          margin: 0.5rem;
+        }
+
+        .difficulty-buttons {
+          gap: 6px;
+        }
+
+        .difficulty-btn {
+          padding: 0.5rem 1rem;
+          font-size: 0.8rem;
+        }
+
+        #grid {
+          gap: 8px;
+          max-width: 300px;
+        }
+
+        .grid-cell td {
+          width: 15px;
+          height: 15px;
+        }
+
+        #move-counter {
+          font-size: 1.25rem;
+          margin-bottom: 1rem;
+        }
+
+        #best-score {
+          font-size: 1.25rem;
+          margin-bottom: 1rem;
+        }
+
+        #restart-btn {
+          padding: 0.75rem 1.5rem;
+          font-size: 0.9rem;
+        }
+      }
+
+      @media screen and (max-width: 360px) {
+        .game-title {
+          font-size: 1.5rem;
+        }
+
+        .game-container {
+          padding: 0.75rem;
+        }
+
+        .difficulty-btn {
+          padding: 0.4rem 0.8rem;
+          font-size: 0.75rem;
+        }
+
+        #grid {
+          gap: 6px;
+          max-width: 260px;
+        }
+
+        .grid-cell td {
+          width: 12px;
+          height: 12px;
+        }
+
+        .game-rules {
+          font-size: 0.8rem;
+          padding: 1rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <h1 class="game-title">CubePairs Merge & Match</h1>
+
+      <div class="difficulty-buttons">
+        <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+        <button class="difficulty-btn" data-difficulty="medium">Medium</button>
+        <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        <button class="difficulty-btn" data-difficulty="impossible">
+          Impossible
+        </button>
+      </div>
+
+      <div id="move-container">
+        <div id="move-counter">Moves: 0</div>
+        <div id="best-score">Best: --</div>
+      </div>
+      <div id="grid"></div>
+      <button id="restart-btn">Restart Game</button>
+
+      <div id="game-rules" class="game-rules">
+        Select two cells. If they match, both clear. If not, the second cell
+        updates to a mix of both patterns. Clear the grid in as few moves as
+        possible!
+      </div>
+    </div>
+
+    <footer
+      style="
+        margin-top: 20px;
+        text-align: center;
+        color: var(--surface-color);
+        font-size: 0.85rem;
+      "
+    >
+      &copy; 2024. All rights reserved.
+    </footer>
+
+    <!-- Modal HTML -->
+    <div class="modal-overlay" id="modal-overlay">
+      <div class="modal" id="modal">
+        <h2 id="modal-title"></h2>
+        <p id="modal-message"></p>
+        <button class="modal-button" id="modal-button">OK</button>
+      </div>
+    </div>
+
+    <script>
+      class GridGame {
+        constructor() {
+          this.GRID_SIZE = 4;
+          this.SHAPES = [
+            [
+              [1, 1],
+              [1, 1],
+            ],
+            [
+              [0, 1],
+              [1, 1],
+            ],
+            [
+              [1, 0],
+              [1, 1],
+            ],
+            [
+              [1, 1],
+              [0, 1],
+            ],
+            [
+              [1, 1],
+              [1, 0],
+            ],
+            [
+              [0, 0],
+              [1, 1],
+            ],
+            [
+              [1, 1],
+              [0, 0],
+            ],
+            [
+              [0, 1],
+              [0, 1],
+            ],
+            [
+              [1, 0],
+              [1, 0],
+            ],
+            [
+              [0, 1],
+              [1, 0],
+            ],
+            [
+              [1, 0],
+              [0, 1],
+            ],
+            [
+              [0, 1],
+              [0, 0],
+            ],
+            [
+              [0, 0],
+              [1, 0],
+            ],
+            [
+              [1, 0],
+              [0, 0],
+            ],
+            [
+              [0, 0],
+              [0, 1],
+            ],
+          ];
+          this.EMPTY = [
+            [0, 0],
+            [0, 0],
+          ];
+
+          this.difficulties = {
+            easy: {
+              rule: () => true,
+              description:
+                "Select two cells. If they match, both clear. If not, the second cell updates to a mix of both patterns. Clear the grid in as few moves as possible!",
+            },
+            medium: {
+              rule: (row1, col1, row2, col2) =>
+                this.isInSameRowColumnOrDiagonal(row1, col1, row2, col2),
+              description:
+                "Select two cells in the same row, column or diagonal. If they match, both clear. If not, the second cell updates to a mix of both patterns. Clear the grid in as few moves as possible!",
+            },
+            hard: {
+              rule: (row1, col1, row2, col2) =>
+                this.isInSameLineOrColumn(row1, col1, row2, col2),
+              description:
+                "Select two cells in the same row or column. If they match, both clear. If not, the second cell updates to a mix of both patterns. Clear the grid in as few moves as possible!",
+            },
+            impossible: {
+              rule: (row1, col1, row2, col2) =>
+                this.isAdjacent(row1, col1, row2, col2),
+              description:
+                "Select two cells. The second cell must be adjacent to the first. If they match, both clear. If not, the second cell updates to a mix of both patterns. Clear the grid in as few moves as possible!",
+            },
+          };
+
+          // Load current difficulty from localStorage if available
+          this.currentDifficulty =
+            localStorage.getItem("currentDifficulty") || "easy";
+
+          this.gridElement = document.getElementById("grid");
+          this.moveCounterElement = document.getElementById("move-counter");
+          this.bestScoreElement = document.getElementById("best-score");
+          this.restartButton = document.getElementById("restart-btn");
+          this.gameRules = document.getElementById("game-rules");
+
+          this.modalOverlay = document.getElementById("modal-overlay");
+          this.modal = document.getElementById("modal");
+          this.modalTitle = document.getElementById("modal-title");
+          this.modalMessage = document.getElementById("modal-message");
+          this.modalButton = document.getElementById("modal-button");
+
+          this.firstRow = -1;
+          this.firstCol = -1;
+          this.moveCount = 0;
+
+          const loaded = this.loadGameState(this.currentDifficulty);
+          if (!loaded) {
+            this.initializeGrid();
+          }
+
+          this.setupEventListeners();
+          this.updateDifficultyButtonStyles();
+          this.renderGrid();
+          this.updateRules();
+          this.updateMoveCounter();
+          this.updateBestScoreDisplay();
+        }
+
+        setupEventListeners() {
+          this.restartButton.addEventListener("click", () =>
+            this.restartGame()
+          );
+
+          document.querySelectorAll(".difficulty-btn").forEach((button) => {
+            button.addEventListener("click", (e) => {
+              const selectedDifficulty = e.target.dataset.difficulty;
+              if (selectedDifficulty === this.currentDifficulty) {
+                // If same difficulty, do nothing
+                return;
+              }
+              // Save current game state before changing difficulty
+              this.saveGameState(this.currentDifficulty);
+
+              this.currentDifficulty = selectedDifficulty;
+              localStorage.setItem("currentDifficulty", this.currentDifficulty);
+
+              // Load the saved state for the new difficulty if exists
+              const loaded = this.loadGameState(this.currentDifficulty);
+              if (!loaded) {
+                // If no saved state, initialize new game
+                this.initializeGrid();
+              }
+              this.renderGrid();
+              this.updateRules();
+              this.updateMoveCounter();
+              this.updateBestScoreDisplay();
+              this.clearSelection();
+              this.updateDifficultyButtonStyles();
+            });
+          });
+
+          // Add a global click listener to handle unselecting if user clicks outside of the grid
+          document.addEventListener("click", (event) => {
+            if (
+              this.firstRow !== -1 &&
+              this.firstCol !== -1 &&
+              !event.target.closest(".grid-cell") &&
+              !event.target.closest(".modal")
+            ) {
+              this.clearSelection();
+            }
+          });
+
+          // Modal button event
+          this.modalButton.addEventListener("click", () => {
+            this.hidePopup();
+            // If there's a callback after the popup closes, handle it
+            if (this.popupCallback) {
+              this.popupCallback();
+              this.popupCallback = null;
+            }
+          });
+        }
+
+        showPopup(title, message, callback = null) {
+          this.modalTitle.textContent = title;
+          this.modalMessage.textContent = message;
+          this.popupCallback = callback;
+          this.modalOverlay.style.display = "flex";
+        }
+
+        hidePopup() {
+          this.modalOverlay.style.display = "none";
+        }
+
+        updateDifficultyButtonStyles() {
+          const buttons = document.querySelectorAll(".difficulty-btn");
+          buttons.forEach((btn) => {
+            if (btn.dataset.difficulty === this.currentDifficulty) {
+              btn.classList.add("active");
+            } else {
+              btn.classList.remove("active");
+            }
+          });
+        }
+
+        updateRules() {
+          this.gameRules.textContent =
+            this.difficulties[this.currentDifficulty].description;
+        }
+
+        isAdjacent(row1, col1, row2, col2) {
+          return (
+            Math.abs(row1 - row2) <= 1 &&
+            Math.abs(col1 - col2) <= 1 &&
+            !(row1 === row2 && col1 === col2)
+          );
+        }
+
+        isInSameLineOrColumn(row1, col1, row2, col2) {
+          return row1 === row2 || col1 === col2;
+        }
+
+        isInSameRowColumnOrDiagonal(row1, col1, row2, col2) {
+          return (
+            row1 === row2 ||
+            col1 === col2 ||
+            Math.abs(row1 - row2) === Math.abs(col1 - col2)
+          );
+        }
+
+        initializeGrid() {
+          const shapeList = [
+            ...this.SHAPES,
+            this.SHAPES[Math.floor(Math.random() * this.SHAPES.length)],
+          ];
+          this.shuffleArray(shapeList);
+
+          this.grid = Array(this.GRID_SIZE)
+            .fill()
+            .map(() => Array(this.GRID_SIZE).fill(null));
+
+          let shapeIndex = 0;
+          for (let i = 0; i < this.GRID_SIZE; i++) {
+            for (let j = 0; j < this.GRID_SIZE; j++) {
+              this.grid[i][j] = shapeList[shapeIndex++];
+            }
+          }
+
+          this.moveCount = 0;
+          this.firstRow = -1;
+          this.firstCol = -1;
+          this.saveGameState(this.currentDifficulty);
+        }
+
+        shuffleArray(array) {
+          for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+          }
+        }
+
+        renderGrid() {
+          this.gridElement.innerHTML = "";
+          for (let i = 0; i < this.GRID_SIZE; i++) {
+            for (let j = 0; j < this.GRID_SIZE; j++) {
+              const cell = document.createElement("div");
+              cell.className = "grid-cell";
+              cell.dataset.row = i;
+              cell.dataset.col = j;
+              cell.innerHTML = this.getShapeAsHTML(this.grid[i][j]);
+              cell.addEventListener("click", (e) => this.handleCellClick(i, j));
+              this.gridElement.appendChild(cell);
+            }
+          }
+        }
+
+        getShapeAsHTML(shape) {
+          if (!shape || this.isShapeEqual(shape, this.EMPTY)) {
+            return "";
+          }
+
+          let html = "<table>";
+          for (let i = 0; i < 2; i++) {
+            html += "<tr>";
+            for (let j = 0; j < 2; j++) {
+              html += `<td class="${
+                shape[i][j] === 1 ? "filled" : "empty"
+              }"></td>`;
+            }
+            html += "</tr>";
+          }
+          html += "</table>";
+          return html;
+        }
+
+        isShapeEqual(shape1, shape2) {
+          return shape1.every((row, i) =>
+            row.every((cell, j) => cell === shape2[i][j])
+          );
+        }
+
+        xorShapes(shape1, shape2) {
+          return shape1.map((row, i) =>
+            row.map((cell, j) => cell ^ shape2[i][j])
+          );
+        }
+
+        handleCellClick(row, col) {
+          if (this.isShapeEqual(this.grid[row][col], this.EMPTY)) {
+            // Already empty cell
+            return;
+          }
+
+          // If we click the same cell that's selected, unselect it.
+          if (this.firstRow === row && this.firstCol === col) {
+            this.clearSelection();
+            return;
+          }
+
+          if (this.firstRow === -1 && this.firstCol === -1) {
+            // Select the first cell
+            this.firstRow = row;
+            this.firstCol = col;
+            const cell = this.gridElement.querySelector(
+              `[data-row="${row}"][data-col="${col}"]`
+            );
+            cell.classList.add("selected");
+          } else {
+            // Check rule
+            if (
+              !this.difficulties[this.currentDifficulty].rule(
+                this.firstRow,
+                this.firstCol,
+                row,
+                col
+              )
+            ) {
+              this.showPopup(
+                "Invalid Move",
+                "You cannot select these two cells!"
+              );
+              return;
+            }
+
+            // Check match
+            if (
+              this.isShapeEqual(
+                this.grid[this.firstRow][this.firstCol],
+                this.grid[row][col]
+              )
+            ) {
+              this.grid[this.firstRow][this.firstCol] = this.EMPTY;
+              this.grid[row][col] = this.EMPTY;
+            } else {
+              this.grid[row][col] = this.xorShapes(
+                this.grid[this.firstRow][this.firstCol],
+                this.grid[row][col]
+              );
+            }
+
+            // Update the DOM
+            const firstCell = this.gridElement.querySelector(
+              `[data-row="${this.firstRow}"][data-col="${this.firstCol}"]`
+            );
+            const secondCell = this.gridElement.querySelector(
+              `[data-row="${row}"][data-col="${col}"]`
+            );
+
+            firstCell.innerHTML = this.getShapeAsHTML(
+              this.grid[this.firstRow][this.firstCol]
+            );
+            secondCell.innerHTML = this.getShapeAsHTML(this.grid[row][col]);
+
+            firstCell.classList.remove("selected");
+            secondCell.classList.remove("selected");
+
+            this.moveCount++;
+            this.updateMoveCounter();
+
+            // Clear selection
+            this.firstRow = -1;
+            this.firstCol = -1;
+
+            this.saveGameState(this.currentDifficulty);
+
+            if (this.isGridSolved()) {
+              this.showPopup("Congratulations!", "You Win!", () => {
+                this.updateBestScore();
+                this.saveGameState(this.currentDifficulty);
+                this.restartGame();
+              });
+            }
+          }
+        }
+
+        updateMoveCounter() {
+          this.moveCounterElement.textContent = `Moves: ${this.moveCount}`;
+        }
+
+        updateBestScoreDisplay() {
+          const best = this.getBestScoreForDifficulty(this.currentDifficulty);
+          this.bestScoreElement.textContent = `Best: ${
+            best === null ? "--" : best
+          }`;
+        }
+
+        updateBestScore() {
+          const best = this.getBestScoreForDifficulty(this.currentDifficulty);
+          if (best === null || this.moveCount < best) {
+            this.setBestScoreForDifficulty(
+              this.currentDifficulty,
+              this.moveCount
+            );
+          }
+          this.updateBestScoreDisplay();
+        }
+
+        getBestScoreForDifficulty(difficulty) {
+          const best = localStorage.getItem(`bestScore_${difficulty}`);
+          return best ? parseInt(best, 10) : null;
+        }
+
+        setBestScoreForDifficulty(difficulty, score) {
+          localStorage.setItem(`bestScore_${difficulty}`, score.toString());
+        }
+
+        clearSelection() {
+          if (this.firstRow !== -1 && this.firstCol !== -1) {
+            const firstCell = this.gridElement.querySelector(
+              `[data-row="${this.firstRow}"][data-col="${this.firstCol}"]`
+            );
+            if (firstCell) {
+              firstCell.classList.remove("selected");
+            }
+          }
+          this.firstRow = -1;
+          this.firstCol = -1;
+          this.saveGameState(this.currentDifficulty);
+        }
+
+        isGridSolved() {
+          return this.grid.every((row) =>
+            row.every((cell) => this.isShapeEqual(cell, this.EMPTY))
+          );
+        }
+
+        restartGame() {
+          this.initializeGrid();
+          this.renderGrid();
+          this.updateMoveCounter();
+          this.updateBestScoreDisplay();
+          this.clearSelection();
+          this.updateDifficultyButtonStyles();
+        }
+
+        // State saving and loading
+
+        saveGameState(difficulty) {
+          const state = {
+            grid: this.grid,
+            moveCount: this.moveCount,
+            firstRow: this.firstRow,
+            firstCol: this.firstCol,
+          };
+          localStorage.setItem(
+            `gameState_${difficulty}`,
+            JSON.stringify(state)
+          );
+        }
+
+        loadGameState(difficulty) {
+          const stateStr = localStorage.getItem(`gameState_${difficulty}`);
+          if (!stateStr) return false;
+
+          try {
+            const state = JSON.parse(stateStr);
+            if (state && state.grid) {
+              this.grid = state.grid;
+              this.moveCount = state.moveCount;
+              this.firstRow = state.firstRow;
+              this.firstCol = state.firstCol;
+              return true;
+            }
+          } catch (e) {
+            console.error("Failed to load state", e);
+          }
+          return false;
+        }
+      }
+
+      // Initialize the game when the page loads
+      new GridGame();
+    </script>
+  </body>
+</html>
