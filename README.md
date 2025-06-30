@@ -1,6 +1,6 @@
-# Merge & Match
+# Cubepairs
 
-**Merge & Match** is a web-based puzzle game that challenges players to clear a grid by selecting and merging shapes strategically. The game offers four difficulty levels: **Easy**, **Medium**, **Hard**, and **Impossible**.
+**Cubepairs** is a web-based puzzle game that challenges players to clear a grid by selecting and merging shapes strategically. The game offers four difficulty levels: **Easy**, **Medium**, **Hard**, and **Impossible**.
 
 ## 📜 Game Rules
 
